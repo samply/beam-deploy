@@ -7,7 +7,7 @@ ME="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
 
 cd $SCRIPT_DIR
 export PROXY_ID_SHORT=$(echo $PROXY_ID | cut -d '.' -f 1)
-export BROKER_ID=$(echo $PROXY_ID | cut -d '.' -f 3-)
+export BROKER_ID=$(echo $PROXY_ID | cut -d '.' -f 2-)
 export VAULT_ADDR=http://127.0.0.1:8200
 export VAULT_TOKEN=root
 

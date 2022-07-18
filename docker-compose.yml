@@ -32,17 +32,17 @@ services:
     secrets:
       - pki.secret
       - privkey.pem
-  shell:
-    image: ubuntu
-    environment:
-      BROKER_URL: https://broker.demo.beam.samply.de
-      PROXY_ID: proxy2.broker.demo.beam.samply.de
-      PKI_ADDRESS: http://vault:8200
-      APPKEY_app1: ApiKey1
-    secrets:
-      - pki.secret
-      - privkey.pem
-    command: sleep 600
+#  shell:
+#    image: ubuntu
+#    environment:
+#      BROKER_URL: https://broker.demo.beam.samply.de
+#      PROXY_ID: proxy2.broker.demo.beam.samply.de
+#      PKI_ADDRESS: http://vault:8200
+#      APPKEY_app1: ApiKey1
+#    secrets:
+#      - pki.secret
+#      - privkey.pem
+#    command: sleep 600
 secrets:
   pki.secret:
     file: ./pki.secret

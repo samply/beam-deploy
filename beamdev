@@ -7,7 +7,7 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR
 export PROXY_ID
 export PROXY_ID_SHORT=$(echo $PROXY_ID | cut -d '.' -f 1)
-export BROKER_ID=$(echo $PROXY_ID | cut -d '.' -f 3-)
+export BROKER_ID=$(echo $PROXY_ID | cut -d '.' -f 2-)
 
 case "$1" in
   start)
