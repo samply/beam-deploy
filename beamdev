@@ -1,0 +1,30 @@
+#!/bin/bash -e
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+
+[ -z "$PROXY_ID" ] && ( echo "PROXY_ID not set!"; exit 1)
+
+cd $SCRIPT_DIR
+export PROXY_ID
+export PROXY_ID_SHORT=$(echo $PROXY_ID | cut -d '.' -f 1)
+export BROKER_ID=$(echo $PROXY_ID | cut -d '.' -f 3-)
+
+case "$1" in
+  start)
+    if [ ! -e pki/*.pem ]; then
+      pki/pki.sh devsetup
+    fi
+    docker-compose up
+#--abort-on-container-exit
+    ;;
+  clean)
+    docker-compose down
+    rm -vf pki/*.pem pki/*.json
+    ;;
+  stop)
+    docker-compose down
+    ;;
+  *)
+    echo "Usage: $0 start|stop|clean"
+    ;;
+esac

@@ -1,0 +1,91 @@
+version: "3.7"
+services:
+  vault:
+    image: vault
+    ports:
+      - 8200:8200
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: root
+      VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
+    volumes:
+      - ./pki:/pki
+  broker:
+    image: samply/beam-broker:develop
+    ports:
+      - 8080:8080
+    environment:
+      BROKER_URL: https://broker.demo.beam.samply.de
+      PKI_ADDRESS: http://vault:8200
+    secrets:
+      - pki.secret
+  proxy:
+    image: samply/beam-proxy:develop
+    ports:
+      - 8081:8081
+    environment:
+      BROKER_URL: https://broker.demo.beam.samply.de
+      PROXY_ID: proxy2.broker.demo.beam.samply.de
+      PKI_ADDRESS: http://vault:8200
+      APPKEY_app1: ApiKey1
+      HTTP_PROXY:
+      http_proxy:
+    secrets:
+      - pki.secret
+      - privkey.pem
+  shell:
+    image: ubuntu
+    environment:
+      BROKER_URL: https://broker.demo.beam.samply.de
+      PROXY_ID: proxy2.broker.demo.beam.samply.de
+      PKI_ADDRESS: http://vault:8200
+      APPKEY_app1: ApiKey1
+    secrets:
+      - pki.secret
+      - privkey.pem
+    command: sleep 600
+secrets:
+  pki.secret:
+    file: ./pki.secret
+  privkey.pem:
+    file: ./pki/proxy2.priv.pem
+
+#     ports:
+#       - 80:80
+#       - 443:443
+#     environment:
+#       NGINX_HOST: ${HOST}
+#     volumes:
+#       - ./configs/nginx.conf:/etc/nginx/templates/nginx.conf.template:ro
+#       - ./configs/dhparam:/etc/nginx/custom/dhparam:ro
+#       - ./certs:/etc/ssl/nginx/
+#     secrets:
+#       - sslPrivateKeyPassword
+#     profiles:
+#       - prod
+#   magicpl:
+#     image: docker.verbis.dkfz.de/pseudonymisierung/magicpl:master
+#     env_file:
+#       - ./.env
+#     environment:
+#       MAGICPL_API_KEY: notUsedInThisConfigurationButMandatory
+#       MAGICPL_MAINZELLISTE_URL: https://patientlist.ccp-it.dktk.dkfz.de/mainzelliste
+#       TOMCAT_REVERSEPROXY_FQDN: ${HOST:?You must set the HOST environment variable in .env file}
+#       TOMCAT_REVERSEPROXY_SSL: "true"
+#       USE_PROXYCHAIN: "true"
+#       HTTP_PROXY_URL: ${HTTP_PROXY_URL}
+#       HTTPS_PROXY_URL: ${HTTP_PROXY_URL}
+#       DEPLOYMENT_CONTEXT: "api"
+#       MAGICPL_LOG_LEVEL: "info"
+#       CATALINA_OPTS: "-Djdk.http.auth.tunneling.disabledSchemes"
+#     secrets:
+#       - magicpl.docker.xml
+#     volumes:
+#       - "magicplLogs:/usr/local/tomcat/logs"
+#       - "./custom-certs:/docker/custom-certs:ro"
+# secrets:
+#   magicpl.docker.xml:
+#     file: ./configs/magicpl-${COMPOSE_PROFILES}.xml
+#   sslPrivateKeyPassword:
+#     file: ./secrets/sslPrivateKeyPassword
+# volumes:
+#   magicplLogs:
