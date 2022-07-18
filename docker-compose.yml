@@ -1,4 +1,7 @@
 version: "3.7"
+networks:
+  traefik:
+    external: true
 services:
   vault:
     image: vault
@@ -9,6 +12,12 @@ services:
       VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
     volumes:
       - ./pki:/pki
+    labels:
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=Host:vault.demo.beam.samply.de"
+    networks:
+      - traefik
+      - default
   broker:
     image: samply/beam-broker:develop
     ports:
@@ -16,19 +25,30 @@ services:
     environment:
       BROKER_URL: https://broker.demo.beam.samply.de
       PKI_ADDRESS: http://vault:8200
+    labels:
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=Host:broker.demo.beam.samply.de"
+    networks:
+      - traefik
+      - default
     secrets:
       - pki.secret
-  proxy:
+  proxy1:
     image: samply/beam-proxy:develop
     ports:
       - 8081:8081
     environment:
       BROKER_URL: https://broker.demo.beam.samply.de
-      PROXY_ID: proxy2.broker.demo.beam.samply.de
+      PROXY_ID: proxy1.broker.demo.beam.samply.de
       PKI_ADDRESS: http://vault:8200
       APPKEY_app1: ApiKey1
-      HTTP_PROXY:
-      http_proxy:
+      no_proxy: vault
+    labels:
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=Host:proxy1.demo.beam.samply.de"
+    networks:
+      - traefik
+      - default
     secrets:
       - pki.secret
       - privkey.pem
@@ -36,7 +56,7 @@ services:
 #    image: ubuntu
 #    environment:
 #      BROKER_URL: https://broker.demo.beam.samply.de
-#      PROXY_ID: proxy2.broker.demo.beam.samply.de
+#      PROXY_ID: proxy1.broker.demo.beam.samply.de
 #      PKI_ADDRESS: http://vault:8200
 #      APPKEY_app1: ApiKey1
 #    secrets:
@@ -47,45 +67,4 @@ secrets:
   pki.secret:
     file: ./pki.secret
   privkey.pem:
-    file: ./pki/proxy2.priv.pem
-
-#     ports:
-#       - 80:80
-#       - 443:443
-#     environment:
-#       NGINX_HOST: ${HOST}
-#     volumes:
-#       - ./configs/nginx.conf:/etc/nginx/templates/nginx.conf.template:ro
-#       - ./configs/dhparam:/etc/nginx/custom/dhparam:ro
-#       - ./certs:/etc/ssl/nginx/
-#     secrets:
-#       - sslPrivateKeyPassword
-#     profiles:
-#       - prod
-#   magicpl:
-#     image: docker.verbis.dkfz.de/pseudonymisierung/magicpl:master
-#     env_file:
-#       - ./.env
-#     environment:
-#       MAGICPL_API_KEY: notUsedInThisConfigurationButMandatory
-#       MAGICPL_MAINZELLISTE_URL: https://patientlist.ccp-it.dktk.dkfz.de/mainzelliste
-#       TOMCAT_REVERSEPROXY_FQDN: ${HOST:?You must set the HOST environment variable in .env file}
-#       TOMCAT_REVERSEPROXY_SSL: "true"
-#       USE_PROXYCHAIN: "true"
-#       HTTP_PROXY_URL: ${HTTP_PROXY_URL}
-#       HTTPS_PROXY_URL: ${HTTP_PROXY_URL}
-#       DEPLOYMENT_CONTEXT: "api"
-#       MAGICPL_LOG_LEVEL: "info"
-#       CATALINA_OPTS: "-Djdk.http.auth.tunneling.disabledSchemes"
-#     secrets:
-#       - magicpl.docker.xml
-#     volumes:
-#       - "magicplLogs:/usr/local/tomcat/logs"
-#       - "./custom-certs:/docker/custom-certs:ro"
-# secrets:
-#   magicpl.docker.xml:
-#     file: ./configs/magicpl-${COMPOSE_PROFILES}.xml
-#   sslPrivateKeyPassword:
-#     file: ./secrets/sslPrivateKeyPassword
-# volumes:
-#   magicplLogs:
+    file: ./pki/proxy1.priv.pem
