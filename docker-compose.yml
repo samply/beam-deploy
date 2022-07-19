@@ -15,7 +15,7 @@ services:
     labels:
       - "traefik.enable=true"
       #      - "traefik.frontend.rule=Host:vault.demo.beam.samply.de"
-      - "traefik.http.routers.beam-demo-router.rule=Host(`vault.demo.beam.samply.de`)"
+      - "traefik.http.routers.beam-vault.rule=Host(`vault.demo.beam.samply.de`)"
     networks:
       - traefik
       - default
@@ -30,7 +30,7 @@ services:
       NO_PROXY: vault
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.beam-demo-router.rule=Host=Host(`${BROKER_ID}`)"
+      - "traefik.http.routers.beam-broker.rule=Host=Host(`${BROKER_ID}`)"
     networks:
       - traefik
       - default
@@ -51,7 +51,7 @@ services:
     labels:
       - "traefik.enable=true"
       #      - "traefik.frontend.rule=Host:${PROXY_ID}"
-      - "traefik.http.routers.beam-demo-router.rule=Host=Host(`${PROXY_ID}`)"
+      - "traefik.http.routers.beam-proxy1.rule=Host=Host(`${PROXY_ID}`)"
     networks:
       - traefik
       - default
