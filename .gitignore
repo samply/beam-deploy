@@ -1,2 +1,3 @@
 pki/*.pem
 pki/*.json
+pki/*.secret

@@ -2,29 +2,38 @@
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-[ -z "$PROXY_ID" ] && ( echo "PROXY_ID not set!"; exit 1)
+[ -z "$PROXY1_ID" ] && ( echo "PROXY1_ID not set!"; exit 1)
+[ -z "$PROXY2_ID" ] && ( echo "PROXY2_ID not set!"; exit 1)
 
 cd $SCRIPT_DIR
-export PROXY_ID
-export PROXY_ID_SHORT=$(echo $PROXY_ID | cut -d '.' -f 1)
-export BROKER_ID=$(echo $PROXY_ID | cut -d '.' -f 2-)
+export PROXY1_ID
+export PROXY2_ID
+export PROXY1_ID_SHORT=$(echo $PROXY1_ID | cut -d '.' -f 1)
+export PROXY2_ID_SHORT=$(echo $PROXY1_ID | cut -d '.' -f 1)
+export BROKER_ID=$(echo $PROXY1_ID | cut -d '.' -f 2-)
 export BROKER_URL="https://${BROKER_ID}"
 export APP_ID_SHORT=app1
 export APP_KEY=App1Secret
 
+export VAULT_TOKEN=$(echo $RANDOM | md5sum | head -c 20; echo;)
+
+function clean() {
+    docker-compose down
+    rm -vf pki/*.pem pki/*.json
+}
+
 case "$1" in
   start)
-    if [ ! -e pki/*.pem ]; then
-      pki/pki.sh devsetup
-    fi
+    clean
+    pki/pki.sh devsetup
+    echo "$VAULT_TOKEN" > ./pki/pki.secret
     docker-compose up --abort-on-container-exit
     ;;
   clean)
-    docker-compose down
-    rm -vf pki/*.pem pki/*.json
+    clean
     ;;
   stop)
-    docker-compose down
+    clean
     ;;
   *)
     echo "Usage: $0 start|stop|clean"

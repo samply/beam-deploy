@@ -3,13 +3,14 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 ME="$(basename "$(test -L "$0" && readlink "$0" || echo "$0")")"
 
-[ -z "$PROXY_ID" ] && ( echo "PROXY_ID not set!"; exit 1)
+[ -z "$PROXY1_ID" ] && ( echo "PROXY1_ID not set!"; exit 1)
+[ -z "$PROXY2_ID" ] && ( echo "PROXY2_ID not set!"; exit 1)
 
 cd $SCRIPT_DIR
-export PROXY_ID_SHORT=$(echo $PROXY_ID | cut -d '.' -f 1)
-export BROKER_ID=$(echo $PROXY_ID | cut -d '.' -f 2-)
+export PROXY1_ID_SHORT=$(echo $PROXY1_ID | cut -d '.' -f 1)
+export PROXY2_ID_SHORT=$(echo $PROXY2_ID | cut -d '.' -f 1)
+export BROKER_ID=$(echo $PROXY1_ID | cut -d '.' -f 2-)
 export VAULT_ADDR=http://127.0.0.1:8200
-export VAULT_TOKEN=root
 
 function check_prereqs() {
      set +e
@@ -114,12 +115,14 @@ case "$1" in
      devsetup)
 #          set -m # job control
           clean
-          touch ${PROXY_ID_SHORT}.priv.pem # see https://github.com/docker/compose/issues/8305
+          touch ${PROXY1_ID_SHORT}.priv.pem # see https://github.com/docker/compose/issues/8305
+          touch ${PROXY2_ID_SHORT}.priv.pem # see https://github.com/docker/compose/issues/8305
           start
           while ! [ "$(curl -s $VAULT_ADDR/v1/sys/health | jq -r .sealed)" == "false" ]; do echo "Waiting ..."; sleep 0.1; done
           docker-compose exec vault sh -c "https_proxy=$http_proxy apk add --no-cache bash curl jq"
-          docker-compose exec vault sh -c "http_proxy= HTTP_PROXY= PROXY_ID=$PROXY_ID /pki/pki.sh init"
-          docker-compose exec vault sh -c "http_proxy= HTTP_PROXY= PROXY_ID=$PROXY_ID /pki/pki.sh request $PROXY_ID_SHORT"
+          docker-compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy= HTTP_PROXY= PROXY1_ID=$PROXY1_ID PROXY2_ID=$PROXY2_ID /pki/pki.sh init"
+          docker-compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy= HTTP_PROXY= PROXY1_ID=$PROXY1_ID PROXY2_ID=$PROXY2_ID /pki/pki.sh request $PROXY1_ID_SHORT"
+          docker-compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy= HTTP_PROXY= PROXY1_ID=$PROXY1_ID PROXY2_ID=$PROXY2_ID /pki/pki.sh request $PROXY2_ID_SHORT"
           ;;
      *)
           echo "Usage: $0 start|init|(request [AppName])"
