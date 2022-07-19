@@ -114,6 +114,7 @@ case "$1" in
      devsetup)
 #          set -m # job control
           clean
+          touch ${PROXY_ID_SHORT}.priv.pem # see https://github.com/docker/compose/issues/8305
           start
           while ! [ "$(curl -s $VAULT_ADDR/v1/sys/health | jq -r .sealed)" == "false" ]; do echo "Waiting ..."; sleep 0.1; done
           docker-compose exec vault sh -c "https_proxy=$http_proxy apk add --no-cache bash curl jq"

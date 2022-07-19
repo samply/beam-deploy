@@ -23,11 +23,12 @@ services:
     ports:
       - 8080:8080
     environment:
-      BROKER_URL: https://broker.demo.beam.samply.de
+      BROKER_URL: ${BROKER_URL}
       PKI_ADDRESS: http://vault:8200
+      no_proxy: vault
     labels:
       - "traefik.enable=true"
-      - "traefik.frontend.rule=Host:broker.demo.beam.samply.de"
+      - "traefik.frontend.rule=Host:${BROKER_ID}"
     networks:
       - traefik
       - default
@@ -38,14 +39,15 @@ services:
     ports:
       - 8081:8081
     environment:
-      BROKER_URL: https://broker.demo.beam.samply.de
-      PROXY_ID: proxy1.broker.demo.beam.samply.de
+      BROKER_URL: ${BROKER_URL}
+      PROXY_ID: ${PROXY_ID}
       PKI_ADDRESS: http://vault:8200
-      APPKEY_app1: ApiKey1
+      APP_0_ID: ${APP_ID_SHORT}
+      APP_0_KEY: ${APP_KEY}
       no_proxy: vault
     labels:
       - "traefik.enable=true"
-      - "traefik.frontend.rule=Host:proxy1.demo.beam.samply.de"
+      - "traefik.frontend.rule=Host:${PROXY_ID}"
     networks:
       - traefik
       - default
@@ -62,9 +64,9 @@ services:
 #    secrets:
 #      - pki.secret
 #      - privkey.pem
-#    command: sleep 600
+#    command: sh -c export
 secrets:
   pki.secret:
     file: ./pki.secret
   privkey.pem:
-    file: ./pki/proxy1.priv.pem
+    file: ./pki/${PROXY_ID_SHORT}.priv.pem
