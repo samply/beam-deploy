@@ -14,7 +14,8 @@ services:
       - ./pki:/pki
     labels:
       - "traefik.enable=true"
-      - "traefik.frontend.rule=Host:vault.demo.beam.samply.de"
+      #      - "traefik.frontend.rule=Host:vault.demo.beam.samply.de"
+      - "traefik.http.routers.beam-demo-router.rule=Host(`vault.demo.beam.samply.de`)"
     networks:
       - traefik
       - default
@@ -29,7 +30,7 @@ services:
       NO_PROXY: vault
     labels:
       - "traefik.enable=true"
-      - "traefik.frontend.rule=Host:${BROKER_ID}"
+      - "traefik.http.routers.beam-demo-router.rule=Host=Host(`${BROKER_ID}`)"
     networks:
       - traefik
       - default
@@ -49,7 +50,8 @@ services:
       NO_PROXY: vault
     labels:
       - "traefik.enable=true"
-      - "traefik.frontend.rule=Host:${PROXY_ID}"
+      #      - "traefik.frontend.rule=Host:${PROXY_ID}"
+      - "traefik.http.routers.beam-demo-router.rule=Host=Host(`${PROXY_ID}`)"
     networks:
       - traefik
       - default
