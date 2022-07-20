@@ -29,6 +29,7 @@ services:
       PKI_ADDRESS: http://vault:8200
       no_proxy: vault
       NO_PROXY: vault
+      PRIVKEY_FILE: /run/secrets/dummy.pem
     labels:
       - "traefik.enable=true"
       - "traefik.frontend.rule=Host:${BROKER_ID}"
@@ -39,6 +40,7 @@ services:
       - default
     secrets:
       - pki.secret
+      - dummy.pem
   proxy1:
     depends_on: [vault]
     image: samply/beam-proxy:develop
@@ -106,3 +108,5 @@ secrets:
     file: ./pki/${PROXY1_ID_SHORT}.priv.pem
   proxy2.pem:
     file: ./pki/${PROXY2_ID_SHORT}.priv.pem
+  dummy.pem:
+    file: ./pki/dummy.priv.pem

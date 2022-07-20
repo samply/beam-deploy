@@ -65,9 +65,15 @@ function create_intermediate_ca() {
           max_ttl="720h"
 }
 
-function request() {
+function request_proxy() {
      application="${1:-app1}"
      cn="${application}.$BROKER_ID"
+     request "$application" "$cn"
+}
+
+function request() {
+     application=$1
+     cn=$2
      data="{\"common_name\": \"$cn\", \"ttl\": \"24h\"}"
      echo $data
      echo "Creating Certificate for domain $cn"
@@ -109,8 +115,8 @@ case "$1" in
      init)
           init
           ;;
-     request)
-          request $2
+     request_proxy)
+          request_proxy $2
           ;;
      devsetup)
 #          set -m # job control
@@ -121,8 +127,9 @@ case "$1" in
           while ! [ "$(curl -s $VAULT_ADDR/v1/sys/health | jq -r .sealed)" == "false" ]; do echo "Waiting ..."; sleep 0.1; done
           docker-compose exec vault sh -c "https_proxy=$http_proxy apk add --no-cache bash curl jq"
           docker-compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy= HTTP_PROXY= PROXY1_ID=$PROXY1_ID PROXY2_ID=$PROXY2_ID /pki/pki.sh init"
-          docker-compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy= HTTP_PROXY= PROXY1_ID=$PROXY1_ID PROXY2_ID=$PROXY2_ID /pki/pki.sh request $PROXY1_ID_SHORT"
-          docker-compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy= HTTP_PROXY= PROXY1_ID=$PROXY1_ID PROXY2_ID=$PROXY2_ID /pki/pki.sh request $PROXY2_ID_SHORT"
+          docker-compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy= HTTP_PROXY= PROXY1_ID=$PROXY1_ID PROXY2_ID=$PROXY2_ID /pki/pki.sh request_proxy $PROXY1_ID_SHORT"
+          docker-compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy= HTTP_PROXY= PROXY1_ID=$PROXY1_ID PROXY2_ID=$PROXY2_ID /pki/pki.sh request_proxy $PROXY2_ID_SHORT"
+          docker-compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy= HTTP_PROXY= PROXY1_ID=$PROXY1_ID PROXY2_ID=$PROXY2_ID /pki/pki.sh request_proxy dummy"
           ;;
      *)
           echo "Usage: $0 start|init|(request [AppName])"
