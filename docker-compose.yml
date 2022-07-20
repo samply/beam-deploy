@@ -3,6 +3,25 @@ networks:
   traefik:
     external: true
 services:
+#  traefik:
+#    container_name: traefik
+#    image: traefik:latest
+#    command:
+#      - --entrypoints.web.address=:80
+#      - --entrypoints.websecure.address=:443
+#      - --providers.docker=true
+#      - --api.dashboard=true
+#      - --accesslog=true # print access-logs
+#      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+#      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+#    ports:
+#      - 80:80
+#      - 443:443
+#    volumes:
+#      - ./certs:/certs
+#      - /var/run/docker.sock:/var/run/docker.sock:ro
+#    networks:
+#      - traefik
   vault:
     image: vault
     ports:
@@ -15,7 +34,7 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.frontend.rule=Host:vault.demo.beam.samply.de"
-#      - "traefik.http.routers.beam-vault.rule=Host(`vault.demo.beam.samply.de`)"
+#      - "traefik.http.routers.beam-vault.rule=Host(`vault.demo.beam.samply.de`)" v2
     networks:
       - traefik
       - default
