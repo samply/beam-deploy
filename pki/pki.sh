@@ -132,6 +132,6 @@ case "$1" in
           docker-compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy= HTTP_PROXY= PROXY1_ID=$PROXY1_ID PROXY2_ID=$PROXY2_ID /pki/pki.sh request_proxy dummy"
           ;;
      *)
-          echo "Usage: $0 start|init|(request [AppName])"
+          echo "Usage: $0 start|init|(request_proxy [AppName])"
           ;;
 esac
