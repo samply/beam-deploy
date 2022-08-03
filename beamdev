@@ -9,7 +9,7 @@ cd $SCRIPT_DIR
 export PROXY1_ID
 export PROXY2_ID
 export PROXY1_ID_SHORT=$(echo $PROXY1_ID | cut -d '.' -f 1)
-export PROXY2_ID_SHORT=$(echo $PROXY1_ID | cut -d '.' -f 1)
+export PROXY2_ID_SHORT=$(echo $PROXY2_ID | cut -d '.' -f 1)
 export BROKER_ID=$(echo $PROXY1_ID | cut -d '.' -f 2-)
 export BROKER_URL="https://${BROKER_ID}"
 export APP_ID_SHORT=app1
