@@ -1,0 +1,34 @@
+version: "3.7"
+services:
+  proxy:
+    image: samply/beam-proxy:develop
+    ports:
+      - 8082:8081
+    environment:
+      BROKER_URL: ${BROKER_URL}
+      PROXY_ID: ${PROXY_ID}
+      PKI_ADDRESS: http://vault:8200
+      APP_0_ID: ${APP_ID_SHORT}
+      APP_0_KEY: ${APP_KEY}
+      PRIVKEY_FILE: /run/secrets/proxy.pem
+    networks:
+      - default
+    secrets:
+      - pki.secret
+      - proxy.pem
+#  shell:
+#    image: ubuntu
+#    environment:
+#      BROKER_URL: https://broker.demo.beam.samply.de
+#      PROXY1_ID: ${PROXY1_ID}
+#      PROXY2_ID: ${PROXY2_ID}
+#      PKI_ADDRESS: http://vault:8200
+#    secrets:
+#      - pki.secret
+#      - privkey.pem
+#    command: sh -c export
+secrets:
+  pki.secret:
+    file: ./pki/pki.secret
+  proxy.pem:
+    file: ./pki/${PROXY_ID_SHORT}.priv.pem
