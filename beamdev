@@ -53,7 +53,6 @@ case "$1" in
     export PROXY_ID
     export PROXY_ID_SHORT=$(echo $PROXY_ID | cut -d '.' -f 1)
     export BROKER_ID=$(echo $PROXY_ID | cut -d '.' -f 2-)
-    clean local
     docker-compose -f docker-compose-local.yml up --abort-on-container-exit
     ;;
   clean)

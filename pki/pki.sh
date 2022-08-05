@@ -137,6 +137,7 @@ case "$1" in
     ;;
   request_proxy)
     request_proxy $2
+    tar czf "$2_secrets.tar.gz" pki.secret "$2.priv.pem"
     ;;
   setup_central)
     clean central
