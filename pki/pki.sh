@@ -100,8 +100,7 @@ function request() {
      curl --header "X-Vault-Token: $VAULT_TOKEN" \
           --request POST \
           --data "$data" \
-          --no-progress-meter \
-     $VAULT_ADDR/v1/samply_pki/issue/im-dot-dktk-dot-com | jq > ${application}.json
+     $VAULT_ADDR/v1/samply_pki/issue/im-dot-dktk-dot-com | jq . > ${application}.json
      cat ${application}.json | jq -r .data.certificate > ${application}.crt.pem
      cat ${application}.json | jq -r .data.ca_chain[] > ${application}.chain.pem
      cat ${application}.json | jq -r .data.private_key > ${application}.priv.pem
