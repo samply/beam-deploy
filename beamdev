@@ -3,6 +3,8 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
 [ -z "$BROKER_ID" ] && ( echo "BROKER_ID not set!"; exit 1)
+[ -z "$VAULT" ] && ( echo "Vault address not set!"; exit 1)
+
 
 cd $SCRIPT_DIR
 export BROKER_ID
