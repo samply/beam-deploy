@@ -55,6 +55,8 @@ case "$1" in
     export PROXY_ID
     export PROXY_ID_SHORT=$(echo $PROXY_ID | cut -d '.' -f 1)
     export BROKER_ID=$(echo $PROXY_ID | cut -d '.' -f 2-)
+    [ -z "$VAULT" ] && ( echo "VAULT not set!"; exit 1)
+    export VAULT
     docker-compose -f docker-compose-local.yml up --abort-on-container-exit
     ;;
   clean)
