@@ -13,26 +13,22 @@ function general_envs() {
 }
 
 function dev_envs() {
-  [ -z "$APP_ID_SHORT" ] && ( echo "APP_ID_SHORT not set!"; exit 1)
-  [ -z "$APP_KEY" ] && ( echo "APP_KEY not set!"; exit 1)
   [ -z "$PROXY1_ID" ] && ( echo "PROXY1_ID not set!"; exit 1)
   [ -z "$PROXY2_ID" ] && ( echo "PROXY2_ID not set!"; exit 1)
   export PROXY1_ID
   export PROXY2_ID
-  export APP_ID_SHORT
-  export APP_KEY
+  export APP_ID_SHORT=${APP_ID_SHORT:-connect}
+  export APP_KEY=${APP_KEY:-ConnectSecret}
   export PROXY1_ID_SHORT=$(echo $PROXY1_ID | cut -d '.' -f 1)
   export PROXY2_ID_SHORT=$(echo $PROXY2_ID | cut -d '.' -f 1)
   export BROKER_ID=$(echo $PROXY1_ID | cut -d '.' -f 2-)
 }
 
 function local_envs() {
-  [ -z "$APP_ID_SHORT" ] && ( echo "APP_ID_SHORT not set!"; exit 1)
-  [ -z "$APP_KEY" ] && ( echo "APP_KEY not set!"; exit 1)
   [ -z "$PROXY_ID" ] && ( echo "PROXY_ID not set!"; exit 1)
   export PROXY_ID
-  export APP_ID_SHORT
-  export APP_KEY
+  export APP_ID_SHORT=${APP_ID_SHORT:-connect}
+  export APP_KEY=${APP_KEY:-ConnectSecret}
   export PROXY_ID_SHORT=$(echo $PROXY_ID | cut -d '.' -f 1)
   export BROKER_ID=$(echo $PROXY_ID | cut -d '.' -f 2-)
 }
