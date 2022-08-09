@@ -66,6 +66,44 @@ services:
     secrets:
       - pki.secret
       - proxy2.pem
+  connect1:
+    depends_on: [proxy1]
+    image: samply/beam-connect:main
+    ports:
+      - 8062:8062
+    environment:
+      PROXY_URL: http://proxy1:8082
+      PROXY_APIKEY: ${APP_KEY}
+      APP_ID: ${APP_ID_SHORT}.${PROXY1_ID}
+      DISCOVERY_URL: ${DISCOVERY_URL}
+      LOCAL_TARGETS_FILE: /run/secrets/connect_targets.json
+      ALL_PROXY: ${http_proxy}
+      HTTP_PROXY: ${http_proxy}
+      HTTPS_PROXY: ${https_proxy}
+      NO_PROXY: proxy1
+    networks:
+      - default
+    secrets:
+      - connect_targets.json
+  connect2:
+    depends_on: [proxy2]
+    image: samply/beam-connect:main
+    ports:
+      - 8063:8062
+    environment:
+      PROXY_URL: http://proxy2:8083
+      PROXY_APIKEY: ${APP_KEY}
+      APP_ID: ${APP_ID_SHORT}.${PROXY2_ID}
+      DISCOVERY_URL: ${DISCOVERY_URL}
+      LOCAL_TARGETS_FILE: /run/secrets/connect_targets.json
+      ALL_PROXY: ${http_proxy}
+      HTTP_PROXY: ${http_proxy}
+      HTTPS_PROXY: ${https_proxy}
+      NO_PROXY: proxy2
+    networks:
+      - default
+    secrets:
+      - connect_targets.json
 #  shell:
 #    image: ubuntu
 #    environment:
@@ -86,3 +124,5 @@ secrets:
     file: ./pki/${PROXY2_ID_SHORT}.priv.pem
   dummy.pem:
     file: ./pki/dummy.priv.pem
+  connect_targets.json:
+    file: ./example_targets.json
