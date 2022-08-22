@@ -7,14 +7,12 @@ services:
     environment:
       BROKER_URL: ${BROKER_URL}
       PROXY_ID: ${PROXY_ID}
-      PKI_ADDRESS: ${VAULT}
       APP_0_ID: ${APP_ID_SHORT}
       APP_0_KEY: ${APP_KEY}
       PRIVKEY_FILE: /run/secrets/proxy.pem
     networks:
       - default
     secrets:
-      - pki.secret
       - proxy.pem
 #  shell:
 #    image: ubuntu
@@ -28,7 +26,5 @@ services:
 #      - privkey.pem
 #    command: sh -c export
 secrets:
-  pki.secret:
-    file: ./pki/pki.secret
   proxy.pem:
     file: ./pki/${PROXY_ID_SHORT}.priv.pem

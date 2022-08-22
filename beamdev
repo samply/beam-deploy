@@ -2,8 +2,6 @@
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
-[ -z "$BROKER_ID" ] && ( echo "BROKER_ID not set!"; exit 1)
-[ -z "$VAULT" ] && ( echo "Vault address not set!"; exit 1)
 
 
 cd $SCRIPT_DIR
@@ -32,6 +30,7 @@ function clean() {
 
 case "$1" in
   start_dev)
+    [ -z "$BROKER_ID" ] && ( echo "BROKER_ID not set!"; exit 1)
     [ -z "$PROXY1_ID" ] && ( echo "PROXY1_ID not set!"; exit 1)
     [ -z "$PROXY2_ID" ] && ( echo "PROXY2_ID not set!"; exit 1)
     export PROXY1_ID
@@ -45,18 +44,18 @@ case "$1" in
     docker-compose -f docker-compose-dev.yml up --abort-on-container-exit
     ;;
   start_central)
+    [ -z "$BROKER_ID" ] && ( echo "BROKER_ID not set!"; exit 1)
     clean central
     echo "$VAULT_TOKEN" > ./pki/pki.secret
     pki/pki.sh setup_central
     docker-compose -f docker-compose-central.yml up --abort-on-container-exit
     ;;
   start_local)
+    [ -z "$BROKER_ID" ] && ( echo "BROKER_ID not set!"; exit 1)
     [ -z "$PROXY_ID" ] && ( echo "PROXY_ID not set!"; exit 1)
     export PROXY_ID
     export PROXY_ID_SHORT=$(echo $PROXY_ID | cut -d '.' -f 1)
     export BROKER_ID=$(echo $PROXY_ID | cut -d '.' -f 2-)
-    [ -z "$VAULT" ] && ( echo "VAULT not set!"; exit 1)
-    export VAULT
     docker-compose -f docker-compose-local.yml up --abort-on-container-exit
     ;;
   clean)
