@@ -28,7 +28,7 @@ services:
       - pki.secret
       - dummy.pem
   proxy1:
-    depends_on: [vault]
+    depends_on: [broker]
     image: samply/beam-proxy:develop
     ports:
       - 8082:8081
@@ -43,7 +43,7 @@ services:
     secrets:
       - proxy1.pem
   proxy2:
-    depends_on: [vault]
+    depends_on: [broker]
     image: samply/beam-proxy:develop
     ports:
       - 8083:8081
