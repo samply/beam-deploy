@@ -10,10 +10,33 @@ services:
       APP_0_ID: ${APP_ID_SHORT}
       APP_0_KEY: ${APP_KEY}
       PRIVKEY_FILE: /run/secrets/proxy.pem
+      ALL_PROXY: ${http_proxy}
+      HTTP_PROXY: ${http_proxy}
+      HTTPS_PROXY: ${https_proxy}
+      NO_PROXY: ${no_proxy}
     networks:
       - default
     secrets:
       - proxy.pem
+  connect:
+    depends_on: [proxy]
+    image: samply/beam-connect:main
+    ports:
+      - 8062:8062
+    environment:
+      PROXY_URL: http://proxy:8081
+      PROXY_APIKEY: ${APP_KEY}
+      APP_ID: ${APP_ID_SHORT}.${PROXY_ID}
+      DISCOVERY_URL: ${DISCOVERY_URL}
+      LOCAL_TARGETS_FILE: /run/secrets/connect_targets.json
+      ALL_PROXY: ${http_proxy}
+      HTTP_PROXY: ${http_proxy}
+      HTTPS_PROXY: ${https_proxy}
+      NO_PROXY: proxy
+    networks:
+      - default
+    secrets:
+      - connect_targets.json
 #  shell:
 #    image: ubuntu
 #    environment:
@@ -28,3 +51,5 @@ services:
 secrets:
   proxy.pem:
     file: ./pki/${PROXY_ID_SHORT}.priv.pem
+  connect_targets.json:
+    file: ./example_targets.json

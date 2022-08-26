@@ -1,0 +1,6 @@
+[
+  {"external": "ifconfig.me","internal":"ifconfig.me","allowed":["connect1.proxy23.broker.example","connect2.proxy23.broker.example"]},
+  {"external": "ip-api.com","internal":"ip-api.com","allowed":["connect1.proxy23.broker.example","connect2.proxy23.broker.example"]},
+  {"external": "wttr.in","internal":"wttr.in","allowed":["connect1.proxy23.broker.example","connect2.proxy23.broker.example"]},
+  {"external": "node23.uk12.network","internal":"host23.internal.network","allowed":["connect1.proxy23.broker.example","connect2.proxy23.broker.example"]}
+]
