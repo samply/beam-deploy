@@ -9,6 +9,8 @@ export BROKER_ID
 cd $SCRIPT_DIR
 export VAULT_TOKEN=$(cat pki.secret)
 export VAULT_ADDR=http://127.0.0.1:8200
+export EXT_VAULT_ADDR=http://127.0.0.1:8201
+export TTL=720h
 
 function check_prereqs() {
      set +e
@@ -82,7 +84,7 @@ function create_intermediate_ca() {
           allowed_domains="$BROKER_ID" \
           allow_subdomains=true \
           allow_glob_domains=true \
-          max_ttl="720h"
+          max_ttl="$TTL"
 }
 
 function request_proxy() {
@@ -94,18 +96,35 @@ function request_proxy() {
 function request() {
      application=$1
      cn=$2
-     data="{\"common_name\": \"$cn\", \"ttl\": \"24h\"}"
+     data="{\"common_name\": \"$cn\", \"ttl\": \"$TTL\"}"
      echo $data
      echo "Creating Certificate for domain $cn"
+     echo "Sending to ${VAULT_ADDR}"
+     echo "Token: $VAULT_TOKEN"
      curl --header "X-Vault-Token: $VAULT_TOKEN" \
           --request POST \
           --data "$data" \
-          --no-progress-meter \
-     $VAULT_ADDR/v1/samply_pki/issue/im-dot-dktk-dot-com | jq > ${application}.json
+     $VAULT_ADDR/v1/samply_pki/issue/im-dot-dktk-dot-com | jq . > ${application}.json
      cat ${application}.json | jq -r .data.certificate > ${application}.crt.pem
      cat ${application}.json | jq -r .data.ca_chain[] > ${application}.chain.pem
      cat ${application}.json | jq -r .data.private_key > ${application}.priv.pem
      echo "Success: PEM files stored to ${application}*.pem"
+}
+
+function sign_privkey() {
+  application="$1"
+  cn="${application}.$BROKER_ID"
+  CSR=$(mktemp)
+  openssl req -new -key $1.priv.pem -out $CSR -subj "/CN=$cn"
+  data="{\"csr\": \"$(sed ':a;N;$!ba;s/\n/\\n/g' $CSR)\", \"common_name\": \"$cn\", \"ttl\": \"$TTL\"}"
+  curl --header "X-Vault-Token: $VAULT_TOKEN" \
+       --request POST \
+       --data "$data" \
+  $VAULT_ADDR/v1/samply_pki/sign/im-dot-dktk-dot-com | jq . > ${application}.json
+  cat ${application}.json | jq -r .data.certificate > ${application}.crt.pem
+  cat ${application}.json | jq -r .data.ca_chain[] > ${application}.chain.pem
+  rm $CSR
+  echo "Success: PEM files stored to ${application}*.pem"
 }
 
 function init() {
@@ -137,15 +156,24 @@ case "$1" in
     ;;
   request_proxy)
     request_proxy $2
-    tar czf "$2_secrets.tar.gz" pki.secret "$2.priv.pem"
+    ;;
+  request_ext_proxy)
+    export VAULT_ADDR=$EXT_VAULT_ADDR
+    request_proxy $2
+    ;;
+  sign_privkey)
+    shift
+    export VAULT_ADDR=$EXT_VAULT_ADDR
+    sign_privkey $1
     ;;
   setup_central)
-    clean central
+    #clean central
+    export VAULT_ADDR=$EXT_VAULT_ADDR
     start central
-    while ! [ "$(curl -s $VAULT_ADDR/v1/sys/health | jq -r .sealed)" == "false" ]; do echo "Waiting ..."; sleep 0.1; done
+    while ! [ "$(curl -s $VAULT_ADDR/v1/sys/health | jq -r .sealed)" == "false" ]; do echo "Vault not yet ready (or sealed), waiting ..."; sleep 1; done
     docker-compose exec vault sh -c "https_proxy=$http_proxy apk add --no-cache bash curl jq"
-    docker-compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy= HTTP_PROXY= BROKER_ID=$BROKER_ID /pki/pki.sh init"
-    docker-compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy= HTTP_PROXY= BROKER_ID=$BROKER_ID /pki/pki.sh request_proxy dummy"
+    [ -e intermediate.crt.pem ] || docker-compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy= HTTP_PROXY= BROKER_ID=$BROKER_ID /pki/pki.sh init"
+    [ -e dummy.priv.pem ] || docker-compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy= HTTP_PROXY= BROKER_ID=$BROKER_ID /pki/pki.sh request_proxy dummy"
     ;;
   devsetup)
     #          set -m # job control

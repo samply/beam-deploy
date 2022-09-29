@@ -25,7 +25,7 @@ function clean() {
     ;;
   esac
   docker-compose -f $docker_compose_file down
-  rm -vf pki/*.pem pki/*.json
+  #rm -vf pki/*.pem pki/*.json pki/*.tar.gz
 }
 
 case "$1" in
@@ -44,8 +44,9 @@ case "$1" in
     ;;
   start_central)
     clean central
-    echo "$VAULT_TOKEN" > ./pki/pki.secret
+    [ -e ./pki/pki.secret ] || echo "$VAULT_TOKEN" > ./pki/pki.secret
     pki/pki.sh setup_central
+    echo "Already starting everything!"
     docker-compose -f docker-compose-central.yml up --abort-on-container-exit
     ;;
   start_local)
