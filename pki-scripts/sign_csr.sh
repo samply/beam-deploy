@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 
-source .env
-
 CSR_FILE="$1"
 CN_CHECK="$2"
 
 set -u
+set -e
+
+BASE_DIR=$( cd "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && cd .. && pwd)
 
 TTL="720h"
 FORMAT="pem"
 VAULT_ADDR=http://127.0.0.1:8201
-VAULT_TOKEN=$(cat ./pki/pki.secret)
+VAULT_TOKEN=$(cat $BASE_DIR/pki/pki.secret)
 
 if [[ -z $CSR_FILE ]]; then
 	echo "Usage: $0 <csr-file>"

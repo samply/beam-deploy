@@ -1,5 +1,10 @@
 #!/bin/bash
 
+set -e
+set -u
+
+BASE_DIR=$( cd "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && cd .. && pwd)
+
 ##################################
 # Table functions from: https://stackoverflow.com/a/49180405
 function printTable()
@@ -100,13 +105,8 @@ function trimString()
 
 ##################################
 
-if [ -z $1 ]; then
-	echo "Usage: $0 <Vault-Token> [Vault-Address default=http://127.0.0.1:8201]" 
-	exit 0
-fi
-
 VAULT_ADDR=${2:-http://127.0.0.1:8201}
-VAULT_TOKEN=${1}
+VAULT_TOKEN="$(cat $BASE_DIR/pki/pki.secret)"
 
 serials=()
 serials+=$(curl -s -X LIST -H "X-Vault-Token: $VAULT_TOKEN" $VAULT_ADDR/v1/samply_pki/certs | jq .data.keys[] | sed "s/\"//g")
