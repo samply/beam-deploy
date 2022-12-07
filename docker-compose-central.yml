@@ -45,6 +45,7 @@ services:
     secrets:
       - pki.secret
       - dummy.pem
+      - root.crt.pem
 #  shell:
 #    image: ubuntu
 #    environment:
@@ -61,3 +62,5 @@ secrets:
     file: ./pki/pki.secret
   dummy.pem:
     file: ./pki/dummy.priv.pem
+  root.crt.pem:
+    file: ./pki/root.crt.pem
