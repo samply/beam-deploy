@@ -40,8 +40,11 @@ services:
     secrets:
       - pki.secret
       - dummy.pem
+      - root.crt
 secrets:
   pki.secret:
     file: ./pki/pki.secret
   dummy.pem:
     file: ./pki/dummy.priv.pem
+  root.crt:
+    file: ./pki/root.crt
