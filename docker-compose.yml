@@ -1,131 +1,46 @@
 version: "3.7"
-networks:
-  traefik:
-    external: true
 services:
-#  traefik:
-#    container_name: traefik
-#    image: traefik:latest
-#    command:
-#      - --entrypoints.web.address=:80
-#      - --entrypoints.websecure.address=:443
-#      - --providers.docker=true
-#      - --api.dashboard=true
-#      - --accesslog=true # print access-logs
-#      - --entrypoints.web.http.redirections.entrypoint.to=websecure
-#      - --entrypoints.web.http.redirections.entrypoint.scheme=https
-#    ports:
-#      - 80:80
-#      - 443:443
-#    volumes:
-#      - ./certs:/certs
-#      - /var/run/docker.sock:/var/run/docker.sock:ro
-#    networks:
-#      - traefik
   vault:
     image: vault
     ports:
-      - 127.0.0.1:8200:8200
-    environment:
-      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_TOKEN}
-      VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
+      - "127.0.0.1:8200:8200"
     volumes:
       - ./pki:/pki
-    labels:
-      - "traefik.enable=true"
-      - "traefik.frontend.rule=Host:vault.demo.beam.samply.de"
-#      - "traefik.http.routers.beam-vault.rule=Host(`vault.demo.beam.samply.de`)" v2
-    networks:
-      - traefik
-      - default
+      - ./pki-data:/vault/file
+      - ./config.hcl:/vault/config/config.hcl:ro
+    # Enables production mode!
+    command: server
+    cap_add:
+      - IPC_LOCK
   broker:
     depends_on: [vault]
     image: samply/beam-broker:develop
-    ports:
-      - 8081:8080
     environment:
+      RUST_LOG: debug
       BROKER_URL: ${BROKER_URL}
       PKI_ADDRESS: http://vault:8200
       no_proxy: vault
       NO_PROXY: vault
       PRIVKEY_FILE: /run/secrets/dummy.pem
     labels:
+      - "traefik.http.routers.broker.entrypoints=websecure"
+      - "traefik.http.routers.broker.rule=(Host(`$BROKER_ID`))"
+      - "traefik.http.routers.broker.tls=true"
+      - "traefik.http.routers.broker.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.broker.service=broker"
+      - "traefik.http.services.broker.loadbalancer.server.port=8080"
+      - "traefik.docker.network=traefik"
       - "traefik.enable=true"
-      - "traefik.frontend.rule=Host:${BROKER_ID}"
-#      - "traefik.frontend.rule=Host:broker.demo.beam.samply.de"
-#      - "traefik.http.routers.beam-broker.rule=Host=Host(`${BROKER_ID}`)"
     networks:
-      - traefik
       - default
     secrets:
       - pki.secret
       - dummy.pem
-  proxy1:
-    depends_on: [vault]
-    image: samply/beam-proxy:develop
-    ports:
-      - 8082:8081
-    environment:
-      BROKER_URL: ${BROKER_URL}
-      PROXY_ID: ${PROXY1_ID}
-      PKI_ADDRESS: http://vault:8200
-      APP_0_ID: ${APP_ID_SHORT}
-      APP_0_KEY: ${APP_KEY}
-      no_proxy: vault
-      NO_PROXY: vault
-      PRIVKEY_FILE: /run/secrets/proxy1.pem
-    labels:
-      - "traefik.enable=true"
-      - "traefik.frontend.rule=Host:${PROXY1_ID}"
-#      - "traefik.http.routers.beam-proxy1.rule=Host=Host(`${PROXY1_ID}`)"
-    networks:
-      - traefik
-      - default
-    secrets:
-      - pki.secret
-      - proxy1.pem
-  proxy2:
-    depends_on: [vault]
-    image: samply/beam-proxy:develop
-    ports:
-      - 8083:8081
-    environment:
-      BROKER_URL: ${BROKER_URL}
-      PROXY_ID: ${PROXY2_ID}
-      PKI_ADDRESS: http://vault:8200
-      APP_0_ID: ${APP_ID_SHORT}
-      APP_0_KEY: ${APP_KEY}
-      no_proxy: vault
-      NO_PROXY: vault
-      PRIVKEY_FILE: /run/secrets/proxy2.pem
-      VAULT_TOKEN: ${VAULT_TOKEN}
-    labels:
-      - "traefik.enable=true"
-      - "traefik.frontend.rule=Host:${PROXY2_ID}"
-#      - "traefik.http.routers.beam-proxy2.rule=Host=Host(`${PROXY2_ID}`)"
-    networks:
-      - traefik
-      - default
-    secrets:
-      - pki.secret
-      - proxy2.pem
-#  shell:
-#    image: ubuntu
-#    environment:
-#      BROKER_URL: https://broker.demo.beam.samply.de
-#      PROXY1_ID: ${PROXY1_ID}
-#      PROXY2_ID: ${PROXY2_ID}
-#      PKI_ADDRESS: http://vault:8200
-#    secrets:
-#      - pki.secret
-#      - privkey.pem
-#    command: sh -c export
+      - root.crt.pem
 secrets:
   pki.secret:
     file: ./pki/pki.secret
-  proxy1.pem:
-    file: ./pki/${PROXY1_ID_SHORT}.priv.pem
-  proxy2.pem:
-    file: ./pki/${PROXY2_ID_SHORT}.priv.pem
   dummy.pem:
     file: ./pki/dummy.priv.pem
+  root.crt.pem:
+    file: ./pki/root.crt.pem

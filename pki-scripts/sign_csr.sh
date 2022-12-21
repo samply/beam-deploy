@@ -3,19 +3,20 @@
 CSR_FILE="$1"
 CN_CHECK="$2"
 
-set -u
-set -e
+set -o errexit
+set -o nounset
+set -o pipefail
 
 BASE_DIR=$( cd "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && cd .. && pwd)
 
-TTL="720h"
-FORMAT="pem"
-VAULT_ADDR=http://127.0.0.1:8201
+source  "$BASE_DIR/.env"
 VAULT_TOKEN=$(cat $BASE_DIR/pki/pki.secret)
+[[ -z $TTL ]] && ( echo "TTL not set! Please check your .env file."; exit 1)
+[[ -z $VAULT_ADDR ]] && ( echo "VAULT_ADDR not set! Please check your .env file."; exit 1)
 
-if [[ -z $CSR_FILE ]]; then
-	echo "Usage: $0 <csr-file>"
-else
+FORMAT="pem"
+
+function sign_csr(){
 	COMMON_NAME="$(openssl req -in $CSR_FILE -subject -noout | sed "s/.*CN = \(.*\),.*/\1/g")"
 	echo "CSR asks for CN $COMMON_NAME"
 	if [[ "$CN_CHECK" != "$COMMON_NAME" ]]; then
@@ -33,5 +34,11 @@ else
 	curl	--header "X-Vault-Token: $VAULT_TOKEN" \
 		--data "$JSON_STRING" \
 		--request POST \
-		$VAULT_ADDR/v1/samply_pki/sign/im-dot-dktk-dot-com | jq
+		$VAULT_ADDR/v1/samply_pki/sign/im-${PROJECT} | jq
+}
+
+if [[ -z $CSR_FILE ]]; then
+	echo "Usage: $0 <csr-file>"
+else
+	sign_csr
 fi

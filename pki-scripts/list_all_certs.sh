@@ -1,7 +1,6 @@
 #!/bin/bash
 
 set -e
-set -u
 
 BASE_DIR=$( cd "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && cd .. && pwd)
 
@@ -105,7 +104,7 @@ function trimString()
 
 ##################################
 
-VAULT_ADDR=${2:-http://127.0.0.1:8201}
+VAULT_ADDR=${2:-http://127.0.0.1:8200}
 VAULT_TOKEN="$(cat $BASE_DIR/pki/pki.secret)"
 
 serials=()
