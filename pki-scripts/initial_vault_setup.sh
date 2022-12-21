@@ -30,46 +30,46 @@ function check_prereqs() {
 }
 
 function init_vault() {
-     docker compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -it vault vault operator init -key-shares=1 -key-threshold=1 > "$PKI_DIR/init.tmp"
+     docker-compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -it vault vault operator init -key-shares=1 -key-threshold=1 > "$PKI_DIR/init.tmp"
      cat "$PKI_DIR/init.tmp" | grep "Unseal Key" > "$PKI_DIR/unseal_key.secret"
      cat "$PKI_DIR/init.tmp" | grep "Root Token" | awk '{print $4}' > "$PKI_DIR/pki.secret" 
      rm "$PKI_DIR/init.tmp"
 }
 
 function unseal_vault() {
-     docker compose exec -e VAULT_ADDR="http://127.0.0.1:8200" vault vault operator unseal $(cat "$PKI_DIR/unseal_key.secret" | awk '{print $4}')
+     docker-compose exec -e VAULT_ADDR="http://127.0.0.1:8200" vault vault operator unseal $(cat "$PKI_DIR/unseal_key.secret" | awk '{print $4}')
 }
 
 function create_root_ca() {
-     docker compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN=$VAULT_TOKEN vault vault secrets enable pki
-     docker compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN=$VAULT_TOKEN vault vault secrets tune -max-lease-ttl=87600h pki
-     docker compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN=$VAULT_TOKEN -e PROJECT vault \
+     docker-compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN=$VAULT_TOKEN vault vault secrets enable pki
+     docker-compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN=$VAULT_TOKEN vault vault secrets tune -max-lease-ttl=87600h pki
+     docker-compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN=$VAULT_TOKEN -e PROJECT vault \
 	   vault write -field=certificate pki/root/generate/internal \
           common_name="Broker-Root" \
           issuer_name="${PROJECT}-CA-Root" \
           ttl=87600h > "$PKI_DIR/${PROJECT}_root_2022_ca.crt.pem"
-     docker compose exec -e VAULT_ADDR -e VAULT_TOKEN=$VAULT_TOKEN vault vault write pki/roles/2022-servers_root allow_any_name=true
+     docker-compose exec -e VAULT_ADDR -e VAULT_TOKEN=$VAULT_TOKEN vault vault write pki/roles/2022-servers_root allow_any_name=true
      cp "$PKI_DIR/${PROJECT}_root_2022_ca.crt.pem" "$PKI_DIR/root.crt.pem"
 }
 
 function create_intermediate_ca() {
-     docker compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN=$VAULT_TOKEN vault vault secrets enable -path=samply_pki pki
-     docker compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN=$VAULT_TOKEN vault vault secrets tune -max-lease-ttl=43800h samply_pki
-     docker compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN=$VAULT_TOKEN -e BROKER_ID -it vault \
+     docker-compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN=$VAULT_TOKEN vault vault secrets enable -path=samply_pki pki
+     docker-compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN=$VAULT_TOKEN vault vault secrets tune -max-lease-ttl=43800h samply_pki
+     docker-compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN=$VAULT_TOKEN -e BROKER_ID -it vault \
 	   vault write -format=json samply_pki/intermediate/generate/internal \
           common_name="$BROKER_ID Intermediate Authority" \
           issuer_name="$BROKER_ID-intermediate" \
           | jq -r '.data.csr' > "$PKI_DIR/pki_intermediate.csr.pem"
-     docker compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN=$VAULT_TOKEN -e PROJECT -it vault \
+     docker-compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN=$VAULT_TOKEN -e PROJECT -it vault \
 	   vault write -format=json pki/root/sign-intermediate \
           issuer_ref="${PROJECT}-CA-Root" \
           csr=@pki/pki_intermediate.csr.pem \
           format=pem_bundle ttl="43800h" \
           | jq -r '.data.certificate' > "$PKI_DIR/intermediate.crt.pem"
-     docker compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN=$VAULT_TOKEN vault \
+     docker-compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN=$VAULT_TOKEN vault \
 	   vault write samply_pki/intermediate/set-signed certificate=@pki/intermediate.crt.pem
-     ISSUER=$(docker compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN=$VAULT_TOKEN vault vault read -field=default samply_pki/config/issuers)
-     docker compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN=$VAULT_TOKEN -e BROKER_ID -it vault \
+     ISSUER=$(docker-compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN=$VAULT_TOKEN vault vault read -field=default samply_pki/config/issuers)
+     docker-compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN=$VAULT_TOKEN -e BROKER_ID -it vault \
           vault write "samply_pki/roles/im-${PROJECT}" \
           issuer_ref="${ISSUER}" \
           allowed_domains="$BROKER_ID" \
@@ -80,7 +80,7 @@ function create_intermediate_ca() {
 
 function init() {
   	 echo "Starting vault for the first time"
-     docker compose up vault -d
+     docker-compose up vault -d
      
      echo "Waiting 10 seconds for vault to start"
 		 sleep 10
