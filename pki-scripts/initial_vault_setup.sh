@@ -80,7 +80,7 @@ function create_intermediate_ca() {
 
 function init() {
   	 echo "Starting vault for the first time"
-     docker-compose up vault -d
+     docker-compose up -d vault
      
      echo "Waiting 10 seconds for vault to start"
 		 sleep 10
