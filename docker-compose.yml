@@ -7,7 +7,7 @@ services:
     volumes:
       - ./pki:/pki
       - ./pki-data:/vault/file
-      - ./config.hcl:/vault/config/config.hcl:ro
+      - ./lib/config.hcl:/vault/config/config.hcl:ro
     # Enables production mode!
     command: server
     cap_add:
