@@ -14,7 +14,7 @@ services:
       - IPC_LOCK
   broker:
     depends_on: [vault]
-    image: samply/beam-broker:develop
+    image: samply/beam-broker:main
     environment:
       RUST_LOG: debug
       BROKER_URL: ${BROKER_URL}
