@@ -6,7 +6,7 @@ After=docker.service
 [Service]
 Restart=always
 
-WorkingDirectory=/srv/docker/beam-central
+WorkingDirectory=/srv/docker/beam-broker
 
 # Remove old containers, images and volumes
 ExecStartPre=/usr/bin/docker-compose pull
