@@ -99,7 +99,10 @@ function init() {
      create_intermediate_ca
 
      echo "Successfully completed 'init'."
-     echo "Your Vault Unseal Key is located in pki/unseal_key.secret. Please save it in an appropriate password manager and delete the file."
+     echo
+     echo "Now printing your Unseal Key. PLEASE SAVE IT in an appropriate password manager as it will never be shown again."
+     cat $PKI_DIR/unseal_key.secret
+     rm $PKI_DIR/unseal_key.secret
 }
 
 
