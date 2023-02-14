@@ -3,6 +3,8 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+echo -e "Note: This tool should not be used for registering beam proxies. Instead, use beam-enroll to create a CSR and managepki (https://hub.docker.com/r/samply/managepki) to accept it.\n"
+
 function request_proxy() {
      application="${1:-app1}"
      cn="${application}.$BROKER_ID"
@@ -34,8 +36,6 @@ VAULT_TOKEN=$(cat $BASE_DIR/pki/pki.secret)
 
 if [[ -z ${1:-} ]]; then
   echo "Usage: $0 <proxy_shortname>"
-  echo
-  echo "Note: This tool should not be used for registering beam proxies. Instead, use beam-enroll to create a CSR and managepki (https://hub.docker.com/r/samply/managepki) to accept it."
   exit 1
 fi
 
