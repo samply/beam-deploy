@@ -21,7 +21,7 @@ services:
       PKI_ADDRESS: http://vault:8200
       no_proxy: vault
       NO_PROXY: vault
-      PRIVKEY_FILE: /run/secrets/dummy.pem
+      PRIVKEY_FILE: /run/secrets/broker.pem
     labels:
       - "traefik.http.routers.broker.entrypoints=websecure"
       - "traefik.http.routers.broker.rule=(Host(`$BROKER_ID`))"
@@ -35,12 +35,12 @@ services:
       - default
     secrets:
       - pki.secret
-      - dummy.pem
+      - broker.pem
       - root.crt.pem
 secrets:
   pki.secret:
     file: ./pki/pki.secret
-  dummy.pem:
-    file: ./pki/dummy.priv.pem
+  broker.pem:
+    file: ./pki/broker.priv.pem
   root.crt.pem:
     file: ./pki/root.crt.pem
