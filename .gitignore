@@ -1,3 +1,5 @@
 pki/*.pem
 pki/*.json
 pki/*.secret
+pki-data/
+.env
