@@ -4,9 +4,15 @@ This repository will help you set up your own beam broker instance.
 ## Requirements
 Before starting with the installation, ensure you have the following software installed:
 - [docker](https://www.docker.com/)
-- As our script currently requires the command `docker-compose` you need to add the script `/bin/docker-compose` to your server with following content `docker compose "$@"`.
 - [jq](https://stedolan.github.io/jq/)
 - [traefik](https://doc.traefik.io/traefik/) reverse proxy with external network `traefik`
+
+As our scripts currently require the command `docker-compose` you need to add following wrapper script as `/bin/docker-compose` to your server:
+
+``` shell
+#!/usr/bin/env bash
+docker compose "$@"`
+```
 
 ## Quickstart
 1. Checkout this repo, e.g. to `/srv/docker/beam-broker`
@@ -19,3 +25,13 @@ Before starting with the installation, ensure you have the following software in
 A collection of common tasks then managing your own broker.
 ### Unsealing the Vault
 If Beam keeps outputting messages like "Vault is not yet unsealed" (likely on each restart), run `docker exec -it -e VAULT_ADDR=http://localhost:8200 beam-broker-vault-1 vault operator unseal` and enter the unseal key you got in step 3 of the Quickstart.
+
+### Signing a CSR
+Each site or party that wants to communicate through your beam-broker instance must be verified by you to be accepted by the broker.
+For this administration task, we provide a [management tool](https://github.com/samply/managepki), which you can run through the included wrapper script [./pki-scripts/managepki](./pki-scripts/managepki).
+You can call the script like this
+``` shell
+./pki-scripts/managepki sign --csr-file csr/<parties-name>.csr --common-name=<parties-name>.broker.<project-name>.verbis.dkfz.de
+```
+and follow the instructions as prompted.
+
