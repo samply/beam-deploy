@@ -6,4 +6,4 @@ set -o pipefail
 BASE_DIR=$( cd "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && cd .. && pwd)
 VAULT_TOKEN=$(cat $BASE_DIR/pki/pki.secret)
 
-exec docker run --rm -ti --env-file .env -e VAULT_TOKEN=$VAULT_TOKEN --net=host samply/managepki $@
+exec docker run --rm -ti --env-file $BASE_DIR/.env -e VAULT_TOKEN=$VAULT_TOKEN --net=host -v $BASE_DIR/csr:/csr:ro samply/managepki $@
