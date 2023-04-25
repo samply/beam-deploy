@@ -70,7 +70,7 @@ function create_intermediate_ca() {
 	   vault write samply_pki/intermediate/set-signed certificate=@pki/intermediate.crt.pem
      ISSUER=$(docker-compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN=$VAULT_TOKEN vault vault read -field=default samply_pki/config/issuers)
      docker-compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN=$VAULT_TOKEN -e BROKER_ID -it vault \
-          vault write "samply_pki/roles/im-${PROJECT}" \
+          vault write "samply_pki/roles/samply-beam-default-role" \
           issuer_ref="${ISSUER}" \
           allowed_domains="$BROKER_ID" \
           allow_subdomains=true \

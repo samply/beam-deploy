@@ -22,7 +22,7 @@ function request() {
      curl --header "X-Vault-Token: $VAULT_TOKEN" \
           --request POST \
           --data "$data" \
-     $VAULT_ADDR/v1/samply_pki/issue/im-${PROJECT} | jq . > pki/${application}.json
+     $VAULT_ADDR/v1/samply_pki/issue/samply-beam-default-role | jq . > pki/${application}.json
      cat pki/${application}.json | jq -r .data.certificate > pki/${application}.crt.pem
      cat pki/${application}.json | jq -r .data.ca_chain[] > pki/${application}.chain.pem
      cat pki/${application}.json | jq -r .data.private_key > pki/${application}.priv.pem

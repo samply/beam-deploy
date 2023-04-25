@@ -79,7 +79,7 @@ function create_intermediate_ca() {
           format=pem_bundle ttl="43800h" \
           | jq -r '.data.certificate' > intermediate.crt.pem
      vault write samply_pki/intermediate/set-signed certificate=@intermediate.crt.pem
-     vault write samply_pki/roles/im-dot-dktk-dot-com \
+     vault write samply_pki/roles/samply-beam-default-role \
           issuer_ref="$(vault read -field=default samply_pki/config/issuers)" \
           allowed_domains="$BROKER_ID" \
           allow_subdomains=true \
@@ -104,7 +104,7 @@ function request() {
      curl --header "X-Vault-Token: $VAULT_TOKEN" \
           --request POST \
           --data "$data" \
-     $VAULT_ADDR/v1/samply_pki/issue/im-dot-dktk-dot-com | jq . > ${application}.json
+          $VAULT_ADDR/v1/samply_pki/issue/samply-beam-default-role | jq . > ${application}.json
      cat ${application}.json | jq -r .data.certificate > ${application}.crt.pem
      cat ${application}.json | jq -r .data.ca_chain[] > ${application}.chain.pem
      cat ${application}.json | jq -r .data.private_key > ${application}.priv.pem
@@ -120,7 +120,7 @@ function sign_privkey() {
   curl --header "X-Vault-Token: $VAULT_TOKEN" \
        --request POST \
        --data "$data" \
-  $VAULT_ADDR/v1/samply_pki/sign/im-dot-dktk-dot-com | jq . > ${application}.json
+       $VAULT_ADDR/v1/samply_pki/sign/samply-beam-default-role | jq . > ${application}.json
   cat ${application}.json | jq -r .data.certificate > ${application}.crt.pem
   cat ${application}.json | jq -r .data.ca_chain[] > ${application}.chain.pem
   rm $CSR
