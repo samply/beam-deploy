@@ -14,7 +14,7 @@ function request_proxy() {
 function request() {
      application=$1
      cn=$2
-     data="{\"common_name\": \"$cn\", \"ttl\": \"$TTL\"}"
+     data="{\"common_name\": \"$cn\", \"ttl\": \"${TTL}h\"}"
      echo $data
      echo "Creating Certificate for domain $cn"
      echo "Sending to ${VAULT_ADDR}"
