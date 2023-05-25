@@ -3,3 +3,4 @@ pki/*.json
 pki/*.secret
 pki-data/
 .env
+docker-compose.override.yml
