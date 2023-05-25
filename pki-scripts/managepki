@@ -6,4 +6,8 @@ set -o pipefail
 BASE_DIR=$( cd "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && cd .. && pwd)
 VAULT_TOKEN=$(cat $BASE_DIR/pki/pki.secret)
 
-exec docker run --rm -ti --env-file $BASE_DIR/.env -e VAULT_TOKEN=$VAULT_TOKEN --net=host -v $BASE_DIR/csr:/csr:ro samply/managepki $@
+if [ -e $BASE_DIR/lib/icinga.toml ]; then
+  exec docker run --rm -ti --env-file $BASE_DIR/.env -e VAULT_TOKEN=$VAULT_TOKEN --net=host -v $BASE_DIR/csr:/csr:ro -v $BASE_DIR/lib/icinga.toml:/conf/icinga.toml:ro samply/managepki:latest-icinga $@
+else
+  exec docker run --rm -ti --env-file $BASE_DIR/.env -e VAULT_TOKEN=$VAULT_TOKEN --net=host -v $BASE_DIR/csr:/csr:ro samply/managepki $@
+fi
