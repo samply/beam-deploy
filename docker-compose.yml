@@ -25,6 +25,7 @@ services:
       no_proxy: vault
       NO_PROXY: vault
       PRIVKEY_FILE: /run/secrets/broker.pem
+      MONITORING_API_KEY: ${MONITORING_API_KEY}
     labels:
       - "traefik.http.routers.broker.entrypoints=websecure"
       - "traefik.http.routers.broker.rule=(Host(`$BROKER_ID`))"
