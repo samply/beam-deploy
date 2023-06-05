@@ -3,16 +3,9 @@ This repository will help you set up your own beam broker instance.
 
 ## Requirements
 Before starting with the installation, ensure you have the following software installed:
-- [docker](https://www.docker.com/)
+- [docker with docker-compose](https://www.docker.com/)
 - [jq](https://stedolan.github.io/jq/)
 - [traefik](https://doc.traefik.io/traefik/) reverse proxy with external network `traefik`
-
-As our scripts currently require the command `docker-compose` you need to add following wrapper script as `/bin/docker-compose` to your server:
-
-``` shell
-#!/usr/bin/env bash
-docker compose "$@"`
-```
 
 ## Quickstart
 1. Checkout this repo, e.g. to `/srv/docker/beam-broker`
@@ -34,4 +27,10 @@ You can call the script like this
 ./pki-scripts/managepki sign --csr-file csr/<parties-name>.csr --common-name=<parties-name>.broker.<project-name>.verbis.dkfz.de
 ```
 and follow the instructions as prompted.
+
+### Monitoring Beam Certificate Expiry
+To monitor the expiry of all Beam certificates, the [management tool](https://github.com/samply/managepki) implements a warning functionality accessible through the `managepki` wrapper script:
+``` shell
+./pki-scripts/managepki warn <days until expiry>
+```
 
