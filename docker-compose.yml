@@ -4,7 +4,7 @@ networks:
     external: true
 services:
   vault:
-    image: vault
+    image: hashicorp/vault
     ports:
       - "127.0.0.1:8200:8200"
     volumes:
