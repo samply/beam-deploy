@@ -7,7 +7,7 @@ BASE_DIR=$( cd "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && cd .. && pw
 VAULT_TOKEN=$(cat $BASE_DIR/pki/pki.secret)
 
 if [ -e $BASE_DIR/conf/icinga.toml ]; then
-  exec docker run --rm -i --env-file $BASE_DIR/.env -e VAULT_TOKEN=$VAULT_TOKEN --net=host -v $BASE_DIR/csr:/csr:ro -v $BASE_DIR/conf/icinga.toml:/conf/icinga.toml:ro samply/managepki:latest-icinga $@
+  exec docker run --rm -i --env-file $BASE_DIR/.env -e HTTPS_PROXY=$HTTPS_PROXY -e https_proxy=$https_proxy -e VAULT_TOKEN=$VAULT_TOKEN --net=host -v $BASE_DIR/csr:/csr:ro -v $BASE_DIR/conf/icinga.toml:/conf/icinga.toml:ro samply/managepki:latest-icinga $@
 else
-  exec docker run --rm -i --env-file $BASE_DIR/.env -e VAULT_TOKEN=$VAULT_TOKEN --net=host -v $BASE_DIR/csr:/csr:ro samply/managepki $@
+  exec docker run --rm -i --env-file $BASE_DIR/.env -e HTTPS_PROXY=$HTTPS_PROXY -e https_proxy=$https_proxy -e VAULT_TOKEN=$VAULT_TOKEN --net=host -v $BASE_DIR/csr:/csr:ro samply/managepki $@
 fi
