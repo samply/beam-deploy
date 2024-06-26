@@ -15,6 +15,15 @@ services:
     command: server
     cap_add:
       - IPC_LOCK
+  vault-unsealer:
+    depends_on: [vault]
+    image: samply/bridgehead-vaultfetcher:latest
+    command: unsealVault
+    environment:
+      BW_MASTERPASS: ${BW_MASTERPASS}
+      BW_CLIENTID: ${BW_CLIENTID}
+      BW_CLIENTSECRET: ${BW_CLIENTSECRET}
+      BW_SERVER: ${BW_SERVER:-https://pass.verbis.dkfz.de}
   broker:
     depends_on: [vault]
     image: samply/beam-broker:main
