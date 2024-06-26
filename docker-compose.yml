@@ -17,7 +17,7 @@ services:
       - IPC_LOCK
   vault-unsealer:
     depends_on: [vault]
-    image: samply/bridgehead-vaultfetcher:latest
+    image: samply/vaultfetcher:latest
     command: unsealVault
     environment:
       BW_MASTERPASS: ${BW_MASTERPASS}
