@@ -19,7 +19,6 @@ services:
     depends_on: [vault]
     image: samply/beam-broker:main
     environment:
-      RUST_LOG: debug
       BROKER_URL: ${BROKER_URL}
       PKI_ADDRESS: http://vault:8200
       no_proxy: vault
