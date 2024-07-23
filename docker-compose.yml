@@ -17,12 +17,11 @@ services:
       - IPC_LOCK
   vault-unsealer:
     depends_on: [vault]
-    image: samply/vaultfetcher:latest
+    image: samply/vaultfetcher:use-rbw
     command: unsealVault
     environment:
+      BW_EMAIL: bitwarden@${BROKER_ID}
       BW_MASTERPASS: ${BW_MASTERPASS}
-      BW_CLIENTID: ${BW_CLIENTID}
-      BW_CLIENTSECRET: ${BW_CLIENTSECRET}
       BW_SERVER: ${BW_SERVER:-https://pass.verbis.dkfz.de}
   broker:
     depends_on: [vault]
