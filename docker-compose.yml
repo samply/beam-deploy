@@ -17,7 +17,7 @@ services:
       - IPC_LOCK
   vault-unsealer:
     depends_on: [vault]
-    image: samply/vaultfetcher:use-rbw
+    image: samply/vaultfetcher:latest
     command: unsealVault
     environment:
       BW_EMAIL: bitwarden@${BROKER_ID}
