@@ -5,3 +5,5 @@ pki-data/
 .env
 docker-compose.override.yml
 conf/
+certificates/
+csr/
