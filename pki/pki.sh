@@ -37,7 +37,7 @@ function start() {
       docker_compose_file="../docker-compose-local.yml"
     ;;
   esac
-  docker-compose -f $docker_compose_file up -d vault
+  docker compose -f $docker_compose_file up -d vault
 }
 
 function clean() {
@@ -53,7 +53,7 @@ function clean() {
       docker_compose_file="../docker-compose-local.yml"
     ;;
   esac
-  docker-compose -f $docker_compose_file down
+  docker compose -f $docker_compose_file down
 }
 
 function create_root_ca() {
@@ -171,9 +171,9 @@ case "$1" in
     export VAULT_ADDR=$EXT_VAULT_ADDR
     start central
     while ! [ "$(curl -s $VAULT_ADDR/v1/sys/health | jq -r .sealed)" == "false" ]; do echo "Vault not yet ready (or sealed), waiting ..."; sleep 1; done
-    docker-compose exec vault sh -c "https_proxy=$http_proxy apk add --no-cache bash curl jq"
-    [ -e intermediate.crt.pem ] || docker-compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy= HTTP_PROXY= BROKER_ID=$BROKER_ID /pki/pki.sh init"
-    [ -e dummy.priv.pem ] || docker-compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy= HTTP_PROXY= BROKER_ID=$BROKER_ID /pki/pki.sh request_proxy dummy"
+    docker compose exec vault sh -c "https_proxy=$http_proxy apk add --no-cache bash curl jq"
+    [ -e intermediate.crt.pem ] || docker compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy= HTTP_PROXY= BROKER_ID=$BROKER_ID /pki/pki.sh init"
+    [ -e dummy.priv.pem ] || docker compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy= HTTP_PROXY= BROKER_ID=$BROKER_ID /pki/pki.sh request_proxy dummy"
     ;;
   devsetup)
     #          set -m # job control
@@ -189,12 +189,12 @@ case "$1" in
     touch ${PROXY2_ID_SHORT}.priv.pem # see https://github.com/docker/compose/issues/8305
     start dev
     while ! [ "$(curl -s $VAULT_ADDR/v1/sys/health | jq -r .sealed)" == "false" ]; do echo "Waiting ..."; sleep 0.1; done
-    docker-compose exec vault sh -c "https_proxy=$http_proxy apk add --no-cache bash curl jq"
-    docker-compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy=
+    docker compose exec vault sh -c "https_proxy=$http_proxy apk add --no-cache bash curl jq"
+    docker compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy=
     HTTP_PROXY= BROKER_ID=$BROKER_ID /pki/pki.sh init"
-    docker-compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy= HTTP_PROXY= BROKER_ID=$BROKER_ID /pki/pki.sh request_proxy $PROXY1_ID_SHORT"
-    docker-compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy= HTTP_PROXY= BROKER_ID=$BROKER_ID /pki/pki.sh request_proxy $PROXY2_ID_SHORT"
-    docker-compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy= HTTP_PROXY= BROKER_ID=$BROKER_ID /pki/pki.sh request_proxy dummy"
+    docker compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy= HTTP_PROXY= BROKER_ID=$BROKER_ID /pki/pki.sh request_proxy $PROXY1_ID_SHORT"
+    docker compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy= HTTP_PROXY= BROKER_ID=$BROKER_ID /pki/pki.sh request_proxy $PROXY2_ID_SHORT"
+    docker compose exec vault sh -c "VAULT_TOKEN=$VAULT_TOKEN http_proxy= HTTP_PROXY= BROKER_ID=$BROKER_ID /pki/pki.sh request_proxy dummy"
     ;;
   *)
     echo "Usage: $0 start|init|setup_central|devsetup|(request_proxy [AppName])"
