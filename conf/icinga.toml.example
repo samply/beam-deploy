@@ -1,0 +1,9 @@
+max_days = 5
+host_monitoring_name = "supernetwork-broker"
+broker_id = "broker.supernet.work"
+dont_report = [ "^dev(elop)*-", "-dev(elop)*$", "-dev(elop)*-", "broker" ]
+
+[icinga_client]
+icinga_url = "https://monitoring.verbis.dkfz.de"
+username = "icinga-user"
+password = "icinga-pass"
