@@ -44,13 +44,13 @@ function clean() {
   rm -vf *.pem *.json
   case "$1" in
     dev)
-      docker_compose_file="../docker-compose-dev.yml"
+      docker_compose_file="../docker compose-dev.yml"
     ;;
     central)
-      docker_compose_file="../docker-compose-central.yml"
+      docker_compose_file="../docker compose-central.yml"
     ;;
     local)
-      docker_compose_file="../docker-compose-local.yml"
+      docker_compose_file="../docker compose-local.yml"
     ;;
   esac
   docker compose -f $docker_compose_file down
