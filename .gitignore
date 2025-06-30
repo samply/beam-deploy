@@ -8,3 +8,4 @@ docker-compose.override.yml
 !/conf/*.example
 certificates/
 csr/
+cert-manager-db/
