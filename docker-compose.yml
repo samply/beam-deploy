@@ -49,6 +49,85 @@ services:
       - pki.secret
       - broker.pem
       - root.crt.pem
+
+  cert-manager:
+    image: samply/beam-cert-manager:latest
+    profiles: ["cert-manager"]
+    depends_on: [vault]
+    networks:
+      - default
+      - traefik
+    environment:
+      VAULT_URL: "http://vault:8200"
+      BROKER_URL: http://broker:8080
+      BROKER_ID: ${BROKER_ID}
+      BROKER_MONITORING_KEY: ${MONITORING_API_KEY}
+      # Service Configuration
+      PUBLIC_BASE_URL: "https://${BROKER_ID}/csr"
+      ADMIN_ADDR: "0.0.0.0:8080"
+      PUBLIC_ADDR: "0.0.0.0:3000"
+      DB_DIR: "/db"
+      # Email Configuration
+      SMTP_URL: ${SMTP_URL}
+      RUST_LOG: info
+    volumes:
+      - ./cert-manager-db:/db
+      - ./csr:/csr
+    secrets:
+      - pki.secret
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik"
+      # Router for the public CSR submission page
+      - "traefik.http.routers.cert-manager-public.rule=(Host(`${BROKER_ID}`) && PathPrefix(`/csr`))"
+      - "traefik.http.routers.cert-manager-public.entrypoints=websecure"
+      - "traefik.http.routers.cert-manager-public.priority=100"
+      - "traefik.http.routers.cert-manager-public.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.strip-csr.stripprefix.prefixes=/csr"
+      - "traefik.http.routers.cert-manager-public.middlewares=strip-csr"
+      - "traefik.http.routers.cert-manager-public.service=cert-manager-public"
+      - "traefik.http.services.cert-manager-public.loadbalancer.server.port=3000"
+      # Router for the protected admin interface
+      - "traefik.http.routers.cert-manager-admin.rule=(Host(`${BROKER_ID}`) && (PathPrefix(`/admin`) || PathPrefix(`/api`) || PathPrefix(`/assets`)))"
+      - "traefik.http.routers.cert-manager-admin.priority=101"
+      - "traefik.http.routers.cert-manager-admin.entrypoints=websecure"
+      - "traefik.http.routers.cert-manager-admin.tls.certresolver=letsencrypt"
+      - "traefik.http.middlewares.strip-admin.stripprefix.prefixes=/admin"
+      - "traefik.http.routers.cert-manager-admin.middlewares=oidc-auth,strip-admin"
+      - "traefik.http.routers.cert-manager-admin.service=cert-manager-admin"
+      - "traefik.http.services.cert-manager-admin.loadbalancer.server.port=8080"
+
+  oauth2-proxy:
+    image: quay.io/oauth2-proxy/oauth2-proxy:latest
+    profiles: ["cert-manager"]
+    environment:
+      - http_proxy=${HTTP_PROXY}
+      - https_proxy=${HTTPS_PROXY}
+      - OAUTH2_PROXY_PROVIDER=oidc
+      - OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true
+      - OAUTH2_PROXY_OIDC_ISSUER_URL=${OIDC_ISSUER_URL}
+      - OAUTH2_PROXY_CLIENT_ID=${OIDC_CLIENT_ID}
+      - OAUTH2_PROXY_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
+      - OAUTH2_PROXY_COOKIE_SECRET=${OIDC_COOKIE_SECRET}
+      - OAUTH2_PROXY_COOKIE_DOMAINS=${BROKER_ID}
+      - OAUTH2_PROXY_COOKIE_HTTPONLY=false
+      - OAUTH2_PROXY_HTTP_ADDRESS=:4180
+      - OAUTH2_PROXY_REVERSE_PROXY=true
+      - OAUTH2_PROXY_UPSTREAMS=static://202
+      - OAUTH2_PROXY_EMAIL_DOMAINS=*
+      - OAUTH2_PROXY_SCOPE=openid profile email
+      - OAUTH2_PROXY_ALLOWED_GROUPS=${OIDC_CERT_MANAGER_ADMIN_GROUP}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.oidc-auth.forwardauth.address=http://oauth2-proxy:4180"
+      - "traefik.http.middlewares.oidc-auth.forwardauth.authResponseHeaders=X-Auth-Request-User, X-Auth-Request-Email"
+      - "traefik.http.services.traefik-forward-auth.loadbalancer.server.port=4180"
+      - "traefik.http.routers.oidc-router.rule=Host(`${BROKER_ID}`) && PathPrefix(`/oauth2/`)"
+      - "traefik.http.routers.oidc-router.tls=true"
+    networks:
+      - traefik
+      - default
+
 secrets:
   pki.secret:
     file: ./pki/pki.secret
