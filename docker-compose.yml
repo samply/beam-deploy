@@ -51,7 +51,7 @@ services:
       - root.crt.pem
 
   cert-manager:
-    image: samply/beam-cert-manager:latest
+    image: samply/beam-cert-manager:main
     profiles: ["cert-manager"]
     depends_on: [vault]
     networks:
@@ -116,6 +116,7 @@ services:
       - OAUTH2_PROXY_UPSTREAMS=static://202
       - OAUTH2_PROXY_EMAIL_DOMAINS=*
       - OAUTH2_PROXY_SCOPE=openid profile email
+      - OAUTH2_PROXY_WHITELIST_DOMAINS=${BROKER_ID}
       - OAUTH2_PROXY_ALLOWED_GROUPS=${OIDC_CERT_MANAGER_ADMIN_GROUP}
     labels:
       - "traefik.enable=true"
