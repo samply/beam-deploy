@@ -78,6 +78,11 @@ function create_intermediate_ca() {
           max_ttl="720h"
 }
 
+function create_dummy_cert {
+    docker compose exec -e VAULT_ADDR="http://127.0.0.1:8200" -e VAULT_TOKEN=$VAULT_TOKEN vault \
+        vault write samply_pki/issue/samply-beam-default-role common_name="dummy-cert.$BROKER_ID" ttl="720h" > /dev/null
+}
+
 function init() {
   	 echo "Starting vault for the first time"
      docker compose up -d vault
@@ -97,6 +102,9 @@ function init() {
 
      echo "Creating Intermediate CA"
      create_intermediate_ca
+
+     echo "Creating Dummy Certificate"
+     create_dummy_cert
 
      echo "Successfully completed 'init'."
      echo
