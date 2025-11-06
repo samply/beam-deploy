@@ -47,7 +47,6 @@ services:
       - traefik
     secrets:
       - pki.secret
-      - broker.pem
       - root.crt.pem
 
   cert-manager:
@@ -132,7 +131,5 @@ services:
 secrets:
   pki.secret:
     file: ./pki/pki.secret
-  broker.pem:
-    file: ./pki/broker.priv.pem
   root.crt.pem:
     file: ./pki/root.crt.pem
