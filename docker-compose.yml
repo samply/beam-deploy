@@ -91,8 +91,7 @@ services:
       - "traefik.http.routers.cert-manager-admin.priority=101"
       - "traefik.http.routers.cert-manager-admin.entrypoints=websecure"
       - "traefik.http.routers.cert-manager-admin.tls.certresolver=letsencrypt"
-      - "traefik.http.middlewares.strip-admin.stripprefix.prefixes=/admin"
-      - "traefik.http.routers.cert-manager-admin.middlewares=oidc-auth,strip-admin"
+      - "traefik.http.routers.cert-manager-admin.middlewares=oidc-auth"
       - "traefik.http.routers.cert-manager-admin.service=cert-manager-admin"
       - "traefik.http.services.cert-manager-admin.loadbalancer.server.port=8080"
 
