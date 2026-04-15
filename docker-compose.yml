@@ -23,6 +23,7 @@ services:
       BW_EMAIL: bitwarden@${BROKER_ID}
       BW_MASTERPASS: ${BW_MASTERPASS}
       BW_SERVER: ${BW_SERVER:-https://pass.verbis.dkfz.de}
+    restart: on-failure
   broker:
     depends_on: [vault]
     image: samply/beam-broker:main
@@ -48,6 +49,7 @@ services:
     secrets:
       - pki.secret
       - root.crt.pem
+    restart: on-failure
 
   cert-manager:
     image: samply/beam-cert-manager:main
